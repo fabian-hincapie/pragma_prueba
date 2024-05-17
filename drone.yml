@@ -1,0 +1,123 @@
+type: docker
+kind: pipeline
+name: Play
+
+steps:
+    - name: update-terraform
+      image: 198246178974.dkr.ecr.us-east-1.amazonaws.com/pragma_awscli:latest
+      commands:
+        - export S3="jfc-test/terraform.tfstate"
+        - terraform init -backend-config "key=$S3"
+        - terraform plan -var-file=testing.tfvars
+        - terraform apply -var-file=testing.tfvars -auto-approve
+      
+    - name: notify
+      image: appleboy/drone-telegram:1.3.1
+      settings:
+          token:
+              from_secret: TELEGRAM_TOKEN
+          to:
+              from_secret: TELEGRAM_TO
+          format: markdown
+          message: >
+              {{#success build.status}}
+              ✅      Build #{{build.number}} of `{{repo.name}}` on Play succeeded.
+
+
+              📝 Commit by {{commit.author}} on `{{commit.branch}}`:
+
+              ```
+              {{commit.message}}
+              ```
+
+
+              🌐 {{ build.link }}
+              {{else}}
+              ❌      Build #{{build.number}} of `{{repo.name}}` on Play failed.
+
+
+              📝 Commit by {{commit.author}} on `{{commit.branch}}`:
+
+              ```
+              {{commit.message}}
+              ```
+
+
+              🌐 {{ build.link }}
+              {{/success}}
+      when:
+          status:
+              - success
+              - changed
+              - failure
+
+trigger:
+    event:
+        - tag
+
+image_pull_secrets:
+    - DOCKER_CONFIG
+
+---
+
+type: docker
+kind: pipeline
+name: prod
+
+steps:
+    - name: update-terraform
+      image: 198246178974.dkr.ecr.us-east-1.amazonaws.com/pragma_awscli:latest
+      commands:
+        - export S3="jfc-prod/terraform.tfstate"
+        - terraform init -backend-config "key=$S3"
+        - terraform plan -var-file=testing.tfvars
+        - terraform apply -var-file=testing.tfvars -auto-approve
+      
+    - name: notify
+      image: appleboy/drone-telegram:1.3.1
+      settings:
+          token:
+              from_secret: TELEGRAM_TOKEN
+          to:
+              from_secret: TELEGRAM_TO
+          format: markdown
+          message: >
+              {{#success build.status}}
+              ✅      Build #{{build.number}} of `{{repo.name}}` on Play succeeded.
+
+
+              📝 Commit by {{commit.author}} on `{{commit.branch}}`:
+
+              ```
+              {{commit.message}}
+              ```
+
+
+              🌐 {{ build.link }}
+              {{else}}
+              ❌      Build #{{build.number}} of `{{repo.name}}` on Play failed.
+
+
+              📝 Commit by {{commit.author}} on `{{commit.branch}}`:
+
+              ```
+              {{commit.message}}
+              ```
+
+
+              🌐 {{ build.link }}
+              {{/success}}
+      when:
+          status:
+              - success
+              - changed
+              - failure
+
+trigger:
+  event:
+    - promote
+  target:
+    - production
+
+image_pull_secrets:
+    - DOCKER_CONFIG
