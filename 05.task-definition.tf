@@ -9,8 +9,8 @@ resource "aws_ecs_task_definition" "front" {
     {
       name      = "nginx"
       image     = "nginx:latest"
-      # cpu       = var.ecs_cpu_front
-      # memory    = var.ecs_ram_front
+      cpu       = var.ecs_cpu_front
+      memory    = var.ecs_ram_front
       essential = true
       logConfiguration = {
         logDriver = "awslogs"
@@ -49,8 +49,8 @@ resource "aws_ecs_task_definition" "back" {
     {
       name      = "nginx"
       image     = "nginx:latest"
-      # cpu       = var.ecs_cpu_back
-      # memory    = var.ecs_ram_back
+      cpu       = var.ecs_cpu_back
+      memory    = var.ecs_ram_back
       essential = true
       logConfiguration = {
         logDriver = "awslogs"
