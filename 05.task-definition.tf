@@ -62,7 +62,7 @@ resource "aws_ecs_task_definition" "back" {
       }
       environment  = [
       { name = "redisport", value = var.redisport },
-      #{ name = "RedisEndpoint", value = data.aws_elasticache_cluster.redis.endpoint },
+      { name = "RedisEndpoint", value = data.aws_elasticache_cluster.redis.endpoint },
       { name = "dbEndpoint", value = aws_db_instance.primary.endpoint }
       ]
       secrets = [{
